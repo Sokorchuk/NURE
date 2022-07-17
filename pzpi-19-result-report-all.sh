@@ -66,8 +66,7 @@ done
 
 cat "${input_file}" | gawk '
 
-BEGIN {
-    FS=","
+function num_string(num,  return_str) {
 
     num_str[0] = "немає"
     num_str[1] = "один"
@@ -90,15 +89,23 @@ BEGIN {
     num_str[18] = "вісімнадцять"
     num_str[19] = "дев\047ятнадцять"
     num_str[20] = "двадцять"
-    num_str[21] = "двадцять один"
-    num_str[22] = "двадцять два"
-    num_str[23] = "двадцять три"
-    num_str[24] = "двадцять чотири"
-    num_str[25] = "двадцять п\047ть"
-}
+    num_str[30] = "тридцять"
+    num_str[40] = "сорок"
+    num_str[50] = "п\047ятдесят"
+    num_str[60] = "шістдесят"
+    num_str[70] = "сімдесят"
+    num_str[80] = "вісімдесят"
+    num_str[90] = "дев\047яносто"
+    num_str[100] = "сто"
 
-function num_string(num) {
-    return("(" num_str[num] ")")
+    if (num > 100) {
+	return_str = ""
+    } else if ((num <= 20) || ((num % 10) == 0))  {
+	return_str = num_str[num]
+    } else {
+	return_str = num_str[(10 * int(num / 10))] " " num_str[(num % 10)]
+    }
+    return("("return_str")")
 }
 
 function result_string(result_num, string_format, \
@@ -159,7 +166,7 @@ function result_string(result_num, string_format, \
 	result_str_text = "не з\47явився"
 	result_short_str_text = "не з\47явив."
 	result_str_char = "--"
-	absent_stud_num++
+	absent_stud_count++
 
     } else {
 	result_str_text = "Помилка!"
@@ -193,6 +200,8 @@ function whitespace(num,   whitespase_str) {
 }
 
 BEGIN {
+    FS=","
+
     stud_seq_num = 1
 
     excellent_grade_count = 0
@@ -200,7 +209,7 @@ BEGIN {
     satisfactory_grade_count = 0
     unsatisfactory_grade_count = 0
     present_stud_num = 0
-    absent_stud_num = 0
+    absent_stud_count = 0
 
     print "-----------------"
     print "№   Прізвище ім\47я\t\tСеместр\tЕкзамен\tСертифікат\tДисципліна"
@@ -264,7 +273,7 @@ NR > 1 {
 	    "\tрез.=" course_result "\t" result_string(course_result)
 	break
     case "lib_office_tab":
-	print result_string(course_result, "lib_office_tab") ";" $2
+	print result_string(course_result, "lib_office_tab") ";" $2 "_" substr($1,0,1)
 	break
     case "check_only":
 	print (stud_seq_num) " " whitespace(stud_seq_num) $2 " " $1 " " $6 \
@@ -281,16 +290,16 @@ NR > 1 {
 
 END {
     total_grade_count = excellent_grade_count + good_grade_count + \
-	+ satisfactory_grade_count + unsatisfactory_grade_count + absent_stud_num
+	+ satisfactory_grade_count + unsatisfactory_grade_count + absent_stud_count
     print "-----------------"
-    print "Не з\47явилося:  " absent_stud_num
-    print "Bідмінно:     " excellent_grade_count 
-    print "Добре:        " good_grade_count 
-    print "Задовільно:   " satisfactory_grade_count
-    print "Незадовільно: " unsatisfactory_grade_count 
-    print "РАЗОМ:        " total_grade_count 
+    print "Не з\47явилося:  " absent_stud_count
+    print "Bідмінно:      " excellent_grade_count 
+    print "Добре:         " good_grade_count 
+    print "Задовільно:    " satisfactory_grade_count
+    print "Незадовільно:  " unsatisfactory_grade_count 
+    print "РАЗОМ:         " total_grade_count 
     print "-----------------"
-    print absent_stud_num num_string(absent_stud_num) " " \
+    print absent_stud_count num_string(absent_stud_count) " " \
 	  excellent_grade_count num_string(excellent_grade_count) " " \
 	  good_grade_count num_string(good_grade_count) " " \
 	  satisfactory_grade_count num_string(satisfactory_grade_count) " " \
